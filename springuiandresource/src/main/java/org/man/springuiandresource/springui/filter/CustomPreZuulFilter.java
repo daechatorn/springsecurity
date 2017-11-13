@@ -24,6 +24,7 @@ public class CustomPreZuulFilter extends ZuulFilter {
         logger.info("in zuul filter " + ctx.getRequest().getRequestURI());
         byte[] encoded;
         try {
+            //Authorization which, used as a scope on OAUTH2 for filter user's permission
             encoded = Base64.encode("fooClientIdPassword:secret".getBytes("UTF-8"));
             ctx.addZuulRequestHeader("Authorization", "Basic " + new String(encoded));
             logger.info("pre filter");

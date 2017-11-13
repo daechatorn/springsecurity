@@ -31,7 +31,7 @@ app.controller('mainCtrl', function($scope,$resource,$http,$httpParamSerializer,
     $scope.getFoo = function(){
         $scope.foo = $scope.foos.get({fooId:$scope.foo.id});
     }
-    
+    //Authorization which, used as a scope on OAUTH2 for filter user's permission
     $scope.loginData = {grant_type:"password", username: "", password: "", client_id: "fooClientIdPassword"};
     $scope.refreshData = {grant_type:"refresh_token"};
         
