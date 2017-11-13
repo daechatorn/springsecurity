@@ -76,7 +76,7 @@ UI: Usign zuul for filtering request
   Override zuul pre filter for adding the Authorization into request header
 
 
-
+Reference code from: http://www.baeldung.com/rest-api-spring-oauth2-angularjs
 
 
 
