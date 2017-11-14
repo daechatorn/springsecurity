@@ -26,7 +26,8 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
@@ -66,8 +67,10 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(final AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         final TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer()));
+        tokenEnhancerChain.setTokenEnhancers(
+                Arrays.asList(tokenEnhancer(), accessTokenConverter()));
         endpoints.tokenStore(tokenStore())
+                .accessTokenConverter(accessTokenConverter())
                 .tokenEnhancer(tokenEnhancerChain).authenticationManager(authenticationManager);
     }
 
@@ -104,14 +107,20 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Bean
     @Primary
     public DefaultTokenServices tokenServices() {
-        final DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+        DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
         defaultTokenServices.setTokenStore(tokenStore());
         defaultTokenServices.setSupportRefreshToken(true);
         return defaultTokenServices;
     }
     @Bean
     public TokenStore tokenStore() {
-        return new JdbcTokenStore(dataSource());
+        return new JwtTokenStore(accessTokenConverter());
+    }
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey("123");
+        return converter;
     }
     @Bean
     public TokenEnhancer tokenEnhancer() {
@@ -119,9 +128,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     }
     class CustomTokenEnhancerService implements TokenEnhancer {
         @Override
-        public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-            final Map<String, Object> additionalInfo = new HashMap<>();
+        public OAuth2AccessToken enhance(
+                OAuth2AccessToken accessToken,
+                OAuth2Authentication authentication) {
+            Map<String, Object> additionalInfo = new HashMap<>();
             additionalInfo.put("organization", authentication.getName() + randomAlphabetic(4));
+
             ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
             return accessToken;
         }
