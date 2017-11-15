@@ -133,6 +133,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 OAuth2Authentication authentication) {
             Map<String, Object> additionalInfo = new HashMap<>();
             additionalInfo.put("organization", authentication.getName() + randomAlphabetic(4));
+            additionalInfo.put("man", "Test");
 
             ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
             return accessToken;
